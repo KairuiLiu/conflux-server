@@ -1,30 +1,24 @@
-import express from 'express';
-import { Server as SocketIOServer } from 'socket.io';
-import { ExpressPeerServer } from 'peer';
 import 'dotenv/config';
-
-const app = express();
-const server = app.listen(process.env.PORT || 9000, () => {
-  console.log(
-    `Server is running on http://localhost:${process.env.PORT || 9000}`,
-  );
-});
-const io = new SocketIOServer(server);
+import { app, sc, peerServer } from './www';
+import configRouter from './routes/config';
+import logger from 'morgan';
+import cookieParser from 'cookie-parser';
+import express from 'express';
+import { joinMeeting } from './routes/ws_meeting';
+import meetingRouter from './routes/meeting';
 
 // PeerJS server
-const peerServer = ExpressPeerServer(server, { path: '/' });
 app.use('/peer_signal', peerServer);
 
 // WS Server
-io.on('connection', (socket) => {
-  console.log('A user connected with Socket.IO');
-  socket.on('message', (msg) => {
-    console.log('Message received:', msg);
-    io.emit('message', msg);
-  });
-});
+sc.add('join_meeting', joinMeeting);
+sc.init();
 
 // HTTP Server
-app.get('/', (req, res) => {
-  res.send('Hello from Express, PeerJS, and Socket.IO!');
-});
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+app.use('/config', configRouter);
+app.use('/meeting', meetingRouter);
