@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import 'dotenv/config';
 import { genErrorResponse, genSuccessResponse } from '@/utils/gen_response';
-import { createToken } from '@/utils/gen_token';
+import { createToken } from '@/utils/token';
 
 const router = Router();
 

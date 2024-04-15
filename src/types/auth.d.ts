@@ -1,7 +1,7 @@
-interface AuthInfo {
+declare interface AuthInfo {
   uuid: string;
 }
 
-export interface AuthRequest {
+declare interface AuthRequest {
   auth?: AuthInfo;
 }

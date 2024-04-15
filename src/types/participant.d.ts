@@ -1,18 +1,14 @@
-enum ParticipantRole {
-  HOST,
-  PARTICIPANT,
-}
-
 type ParticipantState = {
   mic: boolean;
   camera: boolean;
   screen: boolean;
 };
 
-interface Participant {
-  muid: string;
+declare interface Participant {
+  muid?: string;
+  scid?: string;
   uuid: string;
   name: string;
-  role: ParticipantRole;
+  role: 'HOST' | 'PARTICIPANT';
   state: ParticipantState;
 }

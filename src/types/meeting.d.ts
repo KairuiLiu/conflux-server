@@ -1,21 +1,27 @@
-import { Request } from 'express';
-import { AuthRequest } from './auth';
+type ExpComRequest = Request<
+  ParamsDictionary,
+  any,
+  any,
+  QueryString.ParsedQs,
+  Record<string, any>
+>;
 
-interface MeetingCreateRequest extends Request, AuthRequest {
+declare interface MeetingCreateRequest extends ExpComRequest, AuthRequest {
   body: {
     title: string;
+    organizer_name: string;
   };
 }
 
-interface MeetingGetRequest extends Request, AuthRequest {
+declare interface MeetingGetRequest extends ExpComRequest, AuthRequest {
   query: {
     id: string;
   };
 }
 
-interface MeetingInfo {
+declare interface MeetingInfo {
   id: string;
   title: string;
   organizer: Pick<ParticipantState, ['muid', 'uuid', 'name']>;
-  participants: ParticipantState[];
+  participants: Participant[];
 }

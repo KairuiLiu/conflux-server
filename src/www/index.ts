@@ -2,6 +2,7 @@ import express from 'express';
 import { Server as SocketIOServer } from 'socket.io';
 import { ExpressPeerServer } from 'peer';
 import 'dotenv/config';
+import mongoose from 'mongoose';
 
 // http server
 export const app = express();
@@ -44,17 +45,17 @@ function onListening() {
 export const peerServer = ExpressPeerServer(server, { path: '/' });
 
 // socket server
-export const io = new SocketIOServer(server);
-const actions = new Map<string, ScCb>();
+export const io = new SocketIOServer(server, {
+  pingInterval: 10000,
+  pingTimeout: 50000,
+});
 
-function add(message: string, cb: ScCb) {
-  actions.set(message, cb);
-}
-
-function init() {
-  io.on('connection', (socket) => {
-    actions.forEach((cb, message) => socket.on(message, cb));
-  });
-}
-
-export const sc = { add, init };
+// db
+mongoose.connect(process.env.MONGO_URI!, {
+  dbName: process.env.MONGO_DBNAME,
+  user: process.env.MONGO_USER,
+  pass: process.env.MONGO_PASS,
+});
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', console.log.bind(console, 'Connected successfully to MongoDB'));

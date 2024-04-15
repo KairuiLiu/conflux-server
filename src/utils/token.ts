@@ -11,3 +11,7 @@ export const authenticate = expressjwt({
   requestProperty: 'auth',
   algorithms: ['HS256'],
 });
+
+export function parseToken(token: string) {
+  return jwt.verify(token, process.env.JWT_SECRET || '') as { uuid: string };
+}
