@@ -6,6 +6,7 @@ import alias from '@rollup/plugin-alias';
 import path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import copy from 'rollup-plugin-copy';
 
 export default {
   input: 'src/main.ts',
@@ -34,5 +35,11 @@ export default {
     }),
     typescript({ tsconfig: './tsconfig.json', outputToFilesystem: true }),
     commonjs(),
+    copy({
+      targets: [
+        { src: 'ecosystem.config.js', dest: 'dist' }
+      ],
+      hook: 'writeBundle'
+    })
   ],
 };
