@@ -24,4 +24,5 @@ declare interface MeetingInfo {
   title: string;
   organizer: Pick<ParticipantState, ['muid', 'uuid', 'name']>;
   participants: Participant[];
+  start_time: number;
 }

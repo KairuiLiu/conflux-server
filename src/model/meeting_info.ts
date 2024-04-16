@@ -13,6 +13,7 @@ const MeetingInfoSchema = new Schema({
     },
     required: true,
   },
+  start_time: { type: Number, required: true },
   participants: {
     type: [
       {

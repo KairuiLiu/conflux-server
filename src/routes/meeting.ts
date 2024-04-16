@@ -32,6 +32,7 @@ router.post(
         name: organizer_name,
       },
       participants: [],
+      start_time: Date.now(),
     });
     meetingInfo.save();
 
