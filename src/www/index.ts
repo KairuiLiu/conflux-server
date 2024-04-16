@@ -48,6 +48,10 @@ export const peerServer = ExpressPeerServer(server, { path: '/' });
 export const io = new SocketIOServer(server, {
   pingInterval: 10000,
   pingTimeout: 50000,
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
 });
 
 // db

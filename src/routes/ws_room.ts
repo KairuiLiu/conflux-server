@@ -47,7 +47,10 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
     await meetInfo.save();
     sc.join(room_id);
 
-    io.sockets.in(meetInfo.id).emit('USER_UPDATE', meetInfo);
+    io.sockets.in(meetInfo.id).emit('USER_UPDATE', {
+      type: 'USER_UPDATE',
+      data: meetInfo,
+    });
     return {
       message: 'JOIN_SUCCESS',
       data: { room: meetInfo },
@@ -78,7 +81,10 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
     );
     sc.leave(room_id);
 
-    io.sockets.in(meetInfo.id).emit('USER_UPDATE', meetInfo);
+    io.sockets.in(meetInfo.id).emit('USER_UPDATE', {
+      type: 'USER_UPDATE',
+      data: meetInfo,
+    });
     meetInfo.save();
 
     return {
@@ -137,7 +143,10 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
     await Promise.all(updates);
 
     meetings.forEach((d) => {
-      io.sockets.in(d.id).emit('USER_UPDATE', d);
+      io.sockets.in(d.id).emit('USER_UPDATE', {
+        type: 'USER_UPDATE',
+        data: d,
+      });
       sc.leave(d.id);
     });
   },

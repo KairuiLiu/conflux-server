@@ -11,12 +11,17 @@ app.use('/peer_signal', peerServer);
 
 // WS Server
 io.on('connection', (socket) => {
-  Object.keys(wsController).forEach((key) => {
-    socket.on(key, async (args) => {
-      console.log(`[SOCKERT-${socket.id}] ${key}`);
-      const { type, data } = args;
-      const res = await wsController[type as ControllerKeys](data, socket, io);
-      if (res) socket.emit(res.type, res);
+  console.log(`[CONNECT-${socket.id}]`);
+  Object.keys(wsController).forEach((event) => {
+    socket.on(event, async (data) => {
+      console.log(`[SOCKERT-${socket.id}] ${event} ${JSON.stringify(data)}`);
+      const res = await wsController[event as ControllerKeys](data, socket, io);
+      if (res) {
+        console.log(
+          `[SOCKERT-${socket.id}] ${res.type} ${JSON.stringify(res)}`,
+        );
+        socket.emit(res.type, res);
+      }
     });
   });
 });

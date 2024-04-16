@@ -41,7 +41,7 @@ export default {
     copy({
       targets: [
         { src: '.env', dest: 'dist' },
-        !dev && { src: 'ecosystem.config.js', dest: 'dist' },
+        !dev && { src: 'ecosystem.config.cjs', dest: 'dist' },
       ].filter(Boolean),
       hook: 'writeBundle',
     }),

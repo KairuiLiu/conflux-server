@@ -11,4 +11,5 @@ declare interface Participant {
   name: string;
   role: 'HOST' | 'PARTICIPANT';
   state: ParticipantState;
+  avatar: string;
 }

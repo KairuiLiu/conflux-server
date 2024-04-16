@@ -56,8 +56,15 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
         participant_diff.name !== undefined ||
         participant_diff.role !== undefined
       )
-        io.sockets.in(room_id).emit('USER_UPDATE', meetInfo);
-      else io.sockets.in(room_id).emit('USER_STATE_UPDATE', targetUser.state);
+        io.sockets.in(room_id).emit('USER_UPDATE', {
+          type: 'USER_UPDATE',
+          data: meetInfo,
+        });
+      else
+        io.sockets.in(room_id).emit('USER_STATE_UPDATE', {
+          type: 'USER_STATE_UPDATE',
+          data: { muid, state: participant_diff.state },
+        });
 
       return multiScreenShare
         ? {
@@ -110,7 +117,10 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
       );
 
       await meetInfo.save();
-      io.sockets.in(room_id).emit('USER_UPDATE', meetInfo);
+      io.sockets.in(room_id).emit('USER_UPDATE', {
+        type: 'USER_UPDATE',
+        data: meetInfo,
+      });
 
       return {
         message: 'SUCCESS',

@@ -52,7 +52,7 @@ declare interface ServerToClientEvents {
 
   USER_STATE_UPDATE: ServerEventListenersCb<
     'USER_STATE_UPDATE',
-    ParticipantState
+    Participant
   >;
   USER_UPDATE: ServerEventListenersCb<'USER_UPDATE', MeetingInfo>;
   FINISH_MEETING: ServerEventListenersCb<'FINISH_MEETING', null>;
