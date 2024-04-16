@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 
 // http server
 export const app = express();
-const port = normalizePort(process.env.SERVER_PORT || '3000');
+const port = normalizePort(process.env.SERVER_PORT || '9876');
 const server = app.listen(port);
 
 server.on('error', onError);
