@@ -2,7 +2,7 @@ module.exports = {
 	apps: [
 		{
 			name: 'conflux-server',
-			script: './index.js',
+			script: './main.js',
 			watch: true,
 		},
 	],

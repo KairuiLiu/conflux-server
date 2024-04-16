@@ -15,7 +15,6 @@ export default {
     format: 'es',
     sourcemap: true,
   },
-  external: ['express', 'socket.io'],
   plugins: [
     alias({
       entries: [
