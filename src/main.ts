@@ -16,15 +16,25 @@ io.on('connection', (socket) => {
   dev && console.log(`[CONNECT-${socket.id}]`);
   Object.keys(wsController).forEach((event) => {
     socket.on(event, async (data) => {
-      dev &&
-        console.log(`[SOCKERT-${socket.id}] ${event} ${JSON.stringify(data)}`);
-      const res = await wsController[event as ControllerKeys](data, socket, io);
-      if (res) {
+      try {
         dev &&
           console.log(
-            `[SOCKERT-${socket.id}] ${res.type} ${JSON.stringify(res)}`,
+            `[SOCKERT-${socket.id}] ${event} ${JSON.stringify(data)}`,
           );
-        socket.emit(res.type, res);
+        const res = await wsController[event as ControllerKeys](
+          data,
+          socket,
+          io,
+        );
+        if (res) {
+          dev &&
+            console.log(
+              `[SOCKERT-${socket.id}] ${res.type} ${JSON.stringify(res)}`,
+            );
+          socket.emit(res.type, res);
+        }
+      } catch (e) {
+        dev && console.error(e);
       }
     });
   });
