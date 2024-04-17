@@ -34,6 +34,7 @@ const MeetingInfoSchema = new Schema({
             camera: { type: Boolean, required: true },
           },
         },
+        avatar: String
       },
     ],
     required: true,

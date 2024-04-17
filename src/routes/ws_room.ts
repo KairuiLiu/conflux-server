@@ -1,10 +1,12 @@
 import { MeetingInfo } from '@/model/meeting_info';
+import { MeetingInfoMongo } from '@/types/meeting';
+import checkNoneHost from '@/utils/check_none_host';
 import { parseToken } from '@/utils/token';
 import wsBaseHandler from '@/utils/ws_base_handler';
 
 const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
   JOIN_MEETING: async (data, sc, io) => {
-    const { room_id, user_name, muid, token, state } = data;
+    const { room_id, user_name, muid, token, state, avatar } = data;
 
     const { success, err } = await wsBaseHandler(
       token,
@@ -37,6 +39,7 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
       name: user_name,
       role: isOrganizer ? 'HOST' : 'PARTICIPANT',
       state,
+      avatar,
     });
 
     await meetInfo.save();
@@ -46,6 +49,7 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
       type: 'USER_UPDATE',
       data: meetInfo,
     });
+
     return {
       message: 'JOIN_SUCCESS',
       data: meetInfo,
@@ -70,12 +74,16 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
     meetInfo.participants = meetInfo.participants.filter(
       (d) => d.uuid !== uuid,
     );
+
     sc.leave(room_id);
+
+    checkNoneHost(meetInfo);
 
     io.sockets.in(meetInfo.id).emit('USER_UPDATE', {
       type: 'USER_UPDATE',
       data: meetInfo,
     });
+
     meetInfo.save();
 
     return {
@@ -125,6 +133,7 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
     }).exec();
     const updates = meetings.map((d) => {
       d.participants = d.participants.filter((p) => p.scid !== id);
+      checkNoneHost(d as MeetingInfoMongo);
       return d.save();
     });
 

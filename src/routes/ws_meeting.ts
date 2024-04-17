@@ -1,5 +1,4 @@
-import { MeetingInfo } from '@/model/meeting_info';
-import { parseToken } from '@/utils/token';
+import checkNoneHost from '@/utils/check_none_host';
 import wsBaseHandler from '@/utils/ws_base_handler';
 
 const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
@@ -46,6 +45,7 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
         meetInfo.participants.filter((d) => d.state.screen).length > 1;
       if (multiScreenShare) targetUser.state.screen = false;
 
+      checkNoneHost(meetInfo);
       await meetInfo.save();
 
       if (
@@ -106,6 +106,8 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
       meetInfo.participants = meetInfo.participants.filter(
         (d) => d.muid !== muid,
       );
+
+      checkNoneHost(meetInfo);
 
       await meetInfo.save();
       io.sockets.in(room_id).emit('USER_UPDATE', {

@@ -28,6 +28,7 @@ declare interface ClientToServerEvents {
     {
       user_name: string;
       muid: string;
+      avatar: string;
       state: ParticipantState;
     }
   >;
@@ -42,19 +43,10 @@ declare interface ServerToClientEvents {
   RES_JOIN_MEETING: ServerEventListenersCb<'RES_JOIN_MEETING', MeetingInfo>;
   RES_LEAVE_MEETING: ServerEventListenersCb<'RES_LEAVE_MEETING', null>;
   RES_FINISH_MEETING: ServerEventListenersCb<'RES_FINISH_MEETING', null>;
-  RES_UPDATE_USER_STATE: ServerEventListenersCb<
-    'RES_UPDATE_USER_STATE',
-    {
-      code?: number;
-      message?: string;
-    }
-  >;
+  RES_UPDATE_USER_STATE: ServerEventListenersCb<'RES_UPDATE_USER_STATE', null>;
   RES_REMOVE_USER: ServerEventListenersCb<'RES_REMOVE_USER', null>;
 
-  USER_STATE_UPDATE: ServerEventListenersCb<
-    'USER_STATE_UPDATE',
-    Participant
-  >;
+  USER_STATE_UPDATE: ServerEventListenersCb<'USER_STATE_UPDATE', Participant>;
   USER_UPDATE: ServerEventListenersCb<'USER_UPDATE', MeetingInfo>;
   FINISH_MEETING: ServerEventListenersCb<'FINISH_MEETING', null>;
 }
