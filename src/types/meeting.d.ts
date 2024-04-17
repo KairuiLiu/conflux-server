@@ -1,3 +1,5 @@
+import { Document } from "mongoose";
+
 type ExpComRequest = Request<
   ParamsDictionary,
   any,
@@ -22,7 +24,9 @@ declare interface MeetingGetRequest extends ExpComRequest, AuthRequest {
 declare interface MeetingInfo {
   id: string;
   title: string;
-  organizer: Pick<ParticipantState, ['muid', 'uuid', 'name']>;
+  organizer: Pick<ParticipantState, 'muid' | 'uuid' | 'name'>;
   participants: Participant[];
   start_time: number;
 }
+
+declare type MeetingInfoMongo = Document & MeetingInfo;

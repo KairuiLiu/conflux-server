@@ -5,7 +5,7 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=DEV rollup -c -w & nodemon --watch dist --exec 'node dist/main.js'",
+    "dev": "MODE=DEV rollup -c -w & nodemon --watch dist --exec 'MODE=DEV node dist/main.js'",
     "build": "rollup -c",
     "format": "prettier --write --loglevel silent",
     "lint": "eslint --fix",

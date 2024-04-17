@@ -1,33 +1,29 @@
 import { MeetingInfo } from '@/model/meeting_info';
 import { parseToken } from '@/utils/token';
+import wsBaseHandler from '@/utils/ws_base_handler';
 
 const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
   {
     UPDATE_USER_STATE: async (data, sc, io) => {
       const { room_id, token, muid, ...participant_diff } = data;
-      const { uuid } = parseToken(token);
 
-      const meetInfo = await MeetingInfo.findOne({ id: room_id }).exec();
-      if (
-        !room_id ||
-        !meetInfo ||
-        !uuid ||
-        ~meetInfo.participants.findIndex((d) => d.uuid === uuid) ||
-        ~meetInfo.participants.findIndex((d) => d.muid === muid)
-      ) {
-        return {
-          message: 'ROOM_NOT_FOUND',
-          data: null,
-          code: 404,
-          type: 'RES_UPDATE_USER_STATE',
-        };
-      }
+      const { success, err } = await wsBaseHandler(
+        token,
+        room_id,
+        'RES_UPDATE_USER_STATE',
+        [],
+        [muid],
+        true,
+      );
+
+      if (err) return err;
+      const { uuid, meetInfo } = success!;
 
       const requestUser = meetInfo.participants.find((d) => d.uuid === uuid)!;
       const isHostRequest = requestUser?.role === 'HOST';
       const targetUser = meetInfo.participants.find((d) => d.muid === muid)!;
 
-      if (requestUser.muid !== muid && !isHostRequest) {
+      if (requestUser?.muid !== muid && !isHostRequest) {
         return {
           message: 'INVALID_REQUEST',
           data: null,
@@ -82,23 +78,18 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
     },
     REMOVE_USER: async (data, sc, io) => {
       const { room_id, token, muid } = data;
-      const { uuid } = parseToken(token);
 
-      const meetInfo = await MeetingInfo.findOne({ id: room_id }).exec();
-      if (
-        !room_id ||
-        !meetInfo ||
-        !uuid ||
-        ~meetInfo.participants.findIndex((d) => d.uuid === uuid) ||
-        ~meetInfo.participants.findIndex((d) => d.muid === muid)
-      ) {
-        return {
-          message: 'ROOM_NOT_FOUND',
-          data: null,
-          code: 404,
-          type: 'RES_UPDATE_USER_STATE',
-        };
-      }
+      const { success, err } = await wsBaseHandler(
+        token,
+        room_id,
+        'RES_UPDATE_USER_STATE',
+        [],
+        [muid],
+        true,
+      );
+
+      if (err) return err;
+      const { uuid, meetInfo } = success!;
 
       const requestUser = meetInfo.participants.find((d) => d.uuid === uuid)!;
       const isHostRequest = requestUser?.role === 'HOST';

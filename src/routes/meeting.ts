@@ -3,6 +3,7 @@ import { generateMeetingId } from '@/utils/gen_meeting_id';
 import { authenticate } from '@/utils/token';
 import { genErrorResponse, genSuccessResponse } from '@/utils/gen_response';
 import { MeetingInfo } from '@/model/meeting_info';
+import { MeetingCreateRequest, MeetingGetRequest } from '@/types/meeting';
 
 const router = Router();
 

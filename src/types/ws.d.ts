@@ -28,6 +28,7 @@ declare interface ClientToServerEvents {
     {
       user_name: string;
       muid: string;
+      state: ParticipantState;
     }
   >;
   LEAVE_MEETING: ClientEventListenersCb<'LEAVE_MEETING', {}>;

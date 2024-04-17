@@ -6,20 +6,24 @@ import express from 'express';
 import meetingRouter from './routes/meeting';
 import wsController from './routes/ws';
 
+const dev = process.env.MODE === 'DEV';
+
 // PeerJS server
 app.use('/peer_signal', peerServer);
 
 // WS Server
 io.on('connection', (socket) => {
-  console.log(`[CONNECT-${socket.id}]`);
+  dev && console.log(`[CONNECT-${socket.id}]`);
   Object.keys(wsController).forEach((event) => {
     socket.on(event, async (data) => {
-      console.log(`[SOCKERT-${socket.id}] ${event} ${JSON.stringify(data)}`);
+      dev &&
+        console.log(`[SOCKERT-${socket.id}] ${event} ${JSON.stringify(data)}`);
       const res = await wsController[event as ControllerKeys](data, socket, io);
       if (res) {
-        console.log(
-          `[SOCKERT-${socket.id}] ${res.type} ${JSON.stringify(res)}`,
-        );
+        dev &&
+          console.log(
+            `[SOCKERT-${socket.id}] ${res.type} ${JSON.stringify(res)}`,
+          );
         socket.emit(res.type, res);
       }
     });
@@ -27,7 +31,7 @@ io.on('connection', (socket) => {
 });
 
 // HTTP Server
-app.use(logger('dev'));
+app.use(logger(dev ? 'dev' : 'common'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

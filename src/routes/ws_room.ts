@@ -1,27 +1,26 @@
 import { MeetingInfo } from '@/model/meeting_info';
 import { parseToken } from '@/utils/token';
+import wsBaseHandler from '@/utils/ws_base_handler';
 
 const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
   JOIN_MEETING: async (data, sc, io) => {
-    const { room_id, user_name, muid, token } = data;
-    const { uuid } = parseToken(token);
-    const meetInfo = await MeetingInfo.findOne({ id: room_id }).exec();
+    const { room_id, user_name, muid, token, state } = data;
 
-    if (!meetInfo) {
-      return {
-        message: 'ROOM_NOT_FOUND',
-        data: null,
-        code: 404,
-        type: 'RES_JOIN_ROOM',
-      };
-    }
+    const { success, err } = await wsBaseHandler(
+      token,
+      room_id,
+      'RES_JOIN_MEETING',
+    );
+
+    if (err) return err;
+    const { uuid, meetInfo } = success!;
 
     if (~meetInfo.participants.findIndex((d) => d.name === user_name)) {
       return {
         message: 'DUPlATE_NAME',
         data: null,
         code: 1,
-        type: 'RES_JOIN_ROOM',
+        type: 'RES_JOIN_MEETING',
       };
     }
 
@@ -37,11 +36,7 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
       scid: sc.id,
       name: user_name,
       role: isOrganizer ? 'HOST' : 'PARTICIPANT',
-      state: {
-        mic: false,
-        screen: false,
-        camera: false,
-      },
+      state,
     });
 
     await meetInfo.save();
@@ -53,28 +48,24 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
     });
     return {
       message: 'JOIN_SUCCESS',
-      data: { room: meetInfo },
-      type: 'RES_JOIN_ROOM',
+      data: meetInfo,
+      type: 'RES_JOIN_MEETING',
     };
   },
   LEAVE_MEETING: async (data, sc, io) => {
     let { room_id, token } = data;
-    const { uuid } = parseToken(token);
 
-    const meetInfo = await MeetingInfo.findOne({ id: room_id }).exec();
-    if (
-      !room_id ||
-      !meetInfo ||
-      !uuid ||
-      ~meetInfo.participants.findIndex((d) => d.uuid === uuid)
-    ) {
-      return {
-        message: 'ROOM_NOT_FOUND',
-        data: null,
-        code: 404,
-        type: 'RES_LEAVE_ROOM',
-      };
-    }
+    const { success, err } = await wsBaseHandler(
+      token,
+      room_id,
+      'RES_LEAVE_MEETING',
+      [],
+      [],
+      true,
+    );
+
+    if (err) return err;
+    const { uuid, meetInfo } = success!;
 
     meetInfo.participants = meetInfo.participants.filter(
       (d) => d.uuid !== uuid,
@@ -90,26 +81,23 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
     return {
       message: 'LEAVE_SUCCESS',
       data: null,
-      type: 'RES_LEAVE_ROOM',
+      type: 'RES_LEAVE_MEETING',
     };
   },
   FINISH_MEETING: async (data, sc, io) => {
     let { room_id, token } = data;
-    const { uuid } = parseToken(token);
-    const meetInfo = await MeetingInfo.findOne({ id: room_id }).exec();
-    if (
-      !room_id ||
-      !meetInfo ||
-      !uuid ||
-      ~meetInfo.participants.findIndex((d) => d.uuid === uuid)
-    ) {
-      return {
-        message: 'ROOM_NOT_FOUND',
-        data: null,
-        code: 404,
-        type: 'RES_LEAVE_ROOM',
-      };
-    }
+
+    const { success, err } = await wsBaseHandler(
+      token,
+      room_id,
+      'RES_FINISH_MEETING',
+      [],
+      [],
+      true,
+    );
+
+    if (err) return err;
+    const { uuid, meetInfo } = success!;
 
     const user = meetInfo.participants.find((d) => d.uuid === uuid);
     if (user?.role !== 'HOST') {
