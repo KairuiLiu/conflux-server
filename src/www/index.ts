@@ -1,16 +1,18 @@
 import express from 'express';
-import { Server as SocketIOServer } from 'socket.io';
-import { ExpressPeerServer } from 'peer';
+import { Server } from 'socket.io';
 import 'dotenv/config';
 import mongoose from 'mongoose';
+import { createServer } from 'http';
+import { ExpressPeerServer } from 'peer';
 
 // http server
 export const app = express();
 const port = normalizePort(process.env.SERVER_PORT || '9876');
-const server = app.listen(port);
+const httpServer = createServer(app);
 
-server.on('error', onError);
-server.on('listening', onListening);
+httpServer.listen(port);
+httpServer.on('error', onError);
+httpServer.on('listening', onListening);
 
 function normalizePort(val: string) {
   return isNaN(parseInt(val, 10)) ? val : parseInt(val, 10);
@@ -36,23 +38,28 @@ function onError(error: any) {
 }
 
 function onListening() {
-  var addr = server.address();
+  var addr = httpServer.address();
   var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr!.port;
   console.log('Listening on ' + bind);
 }
 
-// peer server
-export const peerServer = ExpressPeerServer(server, { path: '/' });
-
 // socket server
-export const io = new SocketIOServer(server, {
+export const io = new Server(httpServer, {
   pingInterval: 10000,
   pingTimeout: 50000,
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
+    credentials: true,
   },
 });
+
+// peer server
+export const appPeer = express();
+const portPeer = normalizePort(process.env.PEERJS_PORT || '9877');
+const httpServerPeer = createServer(appPeer);
+httpServerPeer.listen(portPeer);
+export const serverPeer = ExpressPeerServer(httpServerPeer, { path: '/' });
 
 // db
 mongoose.connect(process.env.MONGO_URI!, {
@@ -63,3 +70,4 @@ mongoose.connect(process.env.MONGO_URI!, {
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', console.log.bind(console, 'Connected successfully to MongoDB'));
+

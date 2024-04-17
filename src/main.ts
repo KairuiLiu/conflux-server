@@ -1,4 +1,4 @@
-import { app, io, peerServer } from './www';
+import { app, io, serverPeer, appPeer } from './www';
 import configRouter from './routes/config';
 import logger from 'morgan';
 import cookieParser from 'cookie-parser';
@@ -9,7 +9,7 @@ import wsController from './routes/ws';
 const dev = process.env.MODE === 'DEV';
 
 // PeerJS server
-app.use('/peer_signal', peerServer);
+appPeer.use('/peer_signal', serverPeer);
 
 // WS Server
 io.on('connection', (socket) => {
