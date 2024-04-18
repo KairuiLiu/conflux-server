@@ -6,12 +6,15 @@ import del from 'rollup-plugin-delete';
 import json from '@rollup/plugin-json';
 import alias from '@rollup/plugin-alias';
 import terser from '@rollup/plugin-terser';
+import replace from '@rollup/plugin-replace';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
 
 const dir = dirname(fileURLToPath(import.meta.url));
 const dev = process.env.MODE === 'DEV';
+const packageJSONPath = path.resolve(dir, 'package.json');
+const packageInfo = JSON.parse(fs.readFileSync(packageJSONPath));
 
 export default {
   input: 'src/main.ts',
@@ -22,6 +25,12 @@ export default {
   },
   plugins: [
     !dev && del({ targets: 'dist' }),
+    // directly replace the string in the code to avoid the pm2 only refreash .env
+    replace({
+      ROLLUP_REPLACE_BUILD_TIME: new Date().toISOString(),
+      ROLLUP_REPLACE_BUILD_VERSION: packageInfo.version,
+      preventAssignment: true,
+    }),
     alias({
       entries: [
         {
@@ -53,13 +62,11 @@ function generatePackageJson(options = {}) {
   return {
     name: 'generate-package-json',
     writeBundle() {
-      const packagePath = path.resolve(dir, 'package.json');
       const distPath = path.resolve(dir, 'dist', 'package.json');
-      const originalPackageJson = JSON.parse(fs.readFileSync(packagePath));
       const newPackageJson = {};
-      Object.keys(originalPackageJson).forEach((key) => {
+      Object.keys(packageInfo).forEach((key) => {
         if (!['devDependencies', 'dependencies', 'scripts'].includes(key)) {
-          newPackageJson[key] = originalPackageJson[key];
+          newPackageJson[key] = packageInfo[key];
         }
       });
       fs.writeFileSync(distPath, JSON.stringify(newPackageJson, null, 2));

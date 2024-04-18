@@ -22,6 +22,8 @@ router.get('/', (req, res) => {
       PEER_SERVER_PATH: process.env.PEER_SERVER_PATH,
       COTURN_USERNAME: process.env.COTURN_USERNAME,
       COTURN_PASSWORD: process.env.COTURN_PASSWORD,
+      BUILD_TIME: 'ROLLUP_REPLACE_BUILD_TIME',
+      BUILD_VERSION: 'ROLLUP_REPLACE_BUILD_VERSION',
     }),
   );
 });
