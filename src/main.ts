@@ -1,3 +1,4 @@
+import ts from '@/utils/time_stemp';
 import { app, io, serverPeer, appPeer } from './www';
 import configRouter from './routes/config';
 import logger from 'morgan';
@@ -31,8 +32,12 @@ io.on('connection', (socket) => {
             console.log(
               `[SOCKERT-${socket.id}] ${res.type} ${JSON.stringify(res)}`,
             );
-          socket.emit(res.type, res);
+          socket.emit(res.type, {
+            ...res,
+            time: ts.t,
+          });
         }
+        ts.tick();
       } catch (e) {
         dev && console.error(e);
       }

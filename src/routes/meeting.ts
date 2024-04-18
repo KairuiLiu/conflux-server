@@ -42,7 +42,7 @@ router.post(
 );
 
 router.get('/', authenticate, async (req: MeetingGetRequest, res: Response) => {
-  const { id } = req.query;
+  const { id, name } = req.query;
 
   if (typeof id !== 'string')
     return res
@@ -50,6 +50,8 @@ router.get('/', authenticate, async (req: MeetingGetRequest, res: Response) => {
       .json(genErrorResponse('Meeting ID is required as a query parameter.'));
 
   const meetInfo = await MeetingInfo.findOne({ id: id }).exec();
+  if (meetInfo?.participants.find((d) => d.name === name))
+    return res.json(genErrorResponse('Name already in use. Please choose another.'));
 
   if (meetInfo) res.json(genSuccessResponse(meetInfo));
   else res.status(404).json(genErrorResponse('Meeting not found.'));

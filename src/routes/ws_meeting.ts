@@ -1,5 +1,6 @@
 import checkNoneHost from '@/utils/check_none_host';
 import wsBaseHandler from '@/utils/ws_base_handler';
+import emitRoom from '@/utils/emit_room';
 
 const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
   {
@@ -24,7 +25,7 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
 
       if (requestUser?.muid !== muid && !isHostRequest) {
         return {
-          message: 'INVALID_REQUEST',
+          message: 'Permission denied.',
           data: null,
           code: 403,
           type: 'RES_UPDATE_USER_STATE',
@@ -35,11 +36,15 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
         targetUser.name = participant_diff.name;
       if (participant_diff.role !== undefined && isHostRequest)
         targetUser.role = participant_diff.role;
-      if (participant_diff.state !== undefined)
-        targetUser.state = {
-          ...targetUser.state,
-          ...participant_diff.state,
-        };
+      if (participant_diff.state !== undefined) {
+        console.log('user state changed', targetUser);
+        (['mic', 'camera', 'screen'] as (keyof ParticipantState)[]).forEach(
+          (k) => {
+            if (participant_diff.state[k] !== undefined)
+              targetUser.state[k] = participant_diff.state[k];
+          },
+        );
+      }
 
       const multiScreenShare =
         meetInfo.participants.filter((d) => d.state.screen).length > 1;
@@ -52,19 +57,19 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
         participant_diff.name !== undefined ||
         participant_diff.role !== undefined
       )
-        io.sockets.in(room_id).emit('USER_UPDATE', {
+        emitRoom(room_id, io, {
           type: 'USER_UPDATE',
           data: meetInfo,
         });
       else
-        io.sockets.in(room_id).emit('USER_STATE_UPDATE', {
+        emitRoom(room_id, io, {
           type: 'USER_STATE_UPDATE',
           data: { muid, state: participant_diff.state },
         });
 
       return multiScreenShare
         ? {
-            message: 'MULTI_SCREEN_SHARE',
+            message: 'Other user is screen sharing',
             data: null,
             code: 400,
             type: 'RES_UPDATE_USER_STATE',
@@ -76,52 +81,7 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
             type: 'RES_UPDATE_USER_STATE',
           };
     },
-    REMOVE_USER: async (data, sc, io) => {
-      const { room_id, token, muid } = data;
-
-      const { success, err } = await wsBaseHandler(
-        token,
-        room_id,
-        'RES_UPDATE_USER_STATE',
-        [],
-        [muid],
-        true,
-      );
-
-      if (err) return err;
-      const { uuid, meetInfo } = success!;
-
-      const requestUser = meetInfo.participants.find((d) => d.uuid === uuid)!;
-      const isHostRequest = requestUser?.role === 'HOST';
-
-      if (!isHostRequest) {
-        return {
-          message: 'NO_PERMISSION',
-          data: null,
-          code: 403,
-          type: 'RES_REMOVE_USER',
-        };
-      }
-
-      meetInfo.participants = meetInfo.participants.filter(
-        (d) => d.muid !== muid,
-      );
-
-      checkNoneHost(meetInfo);
-
-      await meetInfo.save();
-      io.sockets.in(room_id).emit('USER_UPDATE', {
-        type: 'USER_UPDATE',
-        data: meetInfo,
-      });
-
-      return {
-        message: 'SUCCESS',
-        data: null,
-        code: 200,
-        type: 'RES_REMOVE_USER',
-      };
-    },
+    REMOVE_USER: async (data, sc, io) => {},
   };
 
 export default meetControllers;

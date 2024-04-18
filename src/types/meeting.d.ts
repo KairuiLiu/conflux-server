@@ -18,6 +18,7 @@ declare interface MeetingCreateRequest extends ExpComRequest, AuthRequest {
 declare interface MeetingGetRequest extends ExpComRequest, AuthRequest {
   query: {
     id: string;
+    name: string
   };
 }
 

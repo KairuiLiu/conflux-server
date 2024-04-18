@@ -25,7 +25,7 @@ async function wsBaseHandler(
   if (!tokenInfo) {
     return {
       err: {
-        message: 'INVALID_TOKEN',
+        message: 'Unauthorized action.',
         data: null,
         code: 401,
         type: return_type,
@@ -47,7 +47,7 @@ async function wsBaseHandler(
   ) {
     return {
       err: {
-        message: `ROOM_NOT_FOUND ${room_id} ${!!meetInfo} ${uuid} `,
+        message: `Meeting ID ${room_id} not found.`,
         data: null,
         code: 404,
         type: return_type,

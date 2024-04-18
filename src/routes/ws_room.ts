@@ -1,8 +1,8 @@
 import { MeetingInfo } from '@/model/meeting_info';
 import { MeetingInfoMongo } from '@/types/meeting';
 import checkNoneHost from '@/utils/check_none_host';
-import { parseToken } from '@/utils/token';
 import wsBaseHandler from '@/utils/ws_base_handler';
+import emitRoom from '@/utils/emit_room';
 
 const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
   JOIN_MEETING: async (data, sc, io) => {
@@ -19,7 +19,7 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
 
     if (~meetInfo.participants.findIndex((d) => d.name === user_name)) {
       return {
-        message: 'DUPlATE_NAME',
+        message: 'Name already in use. Please choose another.',
         data: null,
         code: 1,
         type: 'RES_JOIN_MEETING',
@@ -45,13 +45,13 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
     await meetInfo.save();
     sc.join(room_id);
 
-    io.sockets.in(meetInfo.id).emit('USER_UPDATE', {
+    emitRoom(meetInfo.id, io, {
       type: 'USER_UPDATE',
       data: meetInfo,
     });
 
     return {
-      message: 'JOIN_SUCCESS',
+      message: 'SUCCESS',
       data: meetInfo,
       type: 'RES_JOIN_MEETING',
     };
@@ -79,7 +79,7 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
 
     checkNoneHost(meetInfo);
 
-    io.sockets.in(meetInfo.id).emit('USER_UPDATE', {
+    emitRoom(meetInfo.id, io, {
       type: 'USER_UPDATE',
       data: meetInfo,
     });
@@ -87,7 +87,7 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
     meetInfo.save();
 
     return {
-      message: 'LEAVE_SUCCESS',
+      message: 'SUCCESS',
       data: null,
       type: 'RES_LEAVE_MEETING',
     };
@@ -110,18 +110,18 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
     const user = meetInfo.participants.find((d) => d.uuid === uuid);
     if (user?.role !== 'HOST') {
       return {
-        message: 'PERMISSION_DENIED',
+        message: 'Permission denied.',
         data: null,
         type: 'RES_FINISH_MEETING',
         code: 403,
       };
     }
 
-    io.sockets.in(room_id).emit('FINISH_MEETING', null);
+    emitRoom(room_id, io, { type: 'FINISH_MEETING' });
     io.socketsLeave(room_id);
     await MeetingInfo.deleteOne({ id: room_id }).exec();
     return {
-      message: 'ROOM_DISSOLVED',
+      message: 'SUCCESS',
       data: null,
       type: 'RES_FINISH_MEETING',
     };
@@ -140,7 +140,7 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
     await Promise.all(updates);
 
     meetings.forEach((d) => {
-      io.sockets.in(d.id).emit('USER_UPDATE', {
+      emitRoom(d.id, io, {
         type: 'USER_UPDATE',
         data: d,
       });
