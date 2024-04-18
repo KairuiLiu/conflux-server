@@ -15,6 +15,10 @@ appPeer.use('/peer_signal', serverPeer);
 // WS Server
 io.on('connection', (socket) => {
   dev && console.log(`[CONNECT-${socket.id}]`);
+  // debug
+  socket.on('PING-AND-FUCK-CHROME', () => {
+    socket.emit('PONG-AND-FUCK-CHROME');
+  });
   Object.keys(wsController).forEach((event) => {
     socket.on(event, async (data) => {
       try {
