@@ -32,8 +32,12 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
         };
       }
 
-      if (participant_diff.name !== undefined)
-        targetUser.name = participant_diff.name;
+      let dulplicatName = false;
+      if (participant_diff.name !== undefined) {
+        if (meetInfo.participants.find((d) => d.name === participant_diff.name))
+          dulplicatName = true;
+        else targetUser.name = participant_diff.name;
+      }
       if (participant_diff.role !== undefined && isHostRequest)
         targetUser.role = participant_diff.role;
       if (participant_diff.state !== undefined) {
@@ -67,21 +71,73 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
           data: { muid, state: participant_diff.state },
         });
 
-      return multiScreenShare
-        ? {
-            message: 'Other user is screen sharing',
-            data: null,
-            code: 400,
-            type: 'RES_UPDATE_USER_STATE',
-          }
-        : {
-            message: 'SUCCESS',
-            data: null,
-            code: 200,
-            type: 'RES_UPDATE_USER_STATE',
-          };
+      if (dulplicatName)
+        return {
+          message: 'Name already in use. Please choose another.',
+          data: null,
+          code: 400,
+          type: 'RES_UPDATE_USER_STATE',
+        };
+      if (multiScreenShare)
+        return {
+          message: 'Other user is screen sharing',
+          data: null,
+          code: 400,
+          type: 'RES_UPDATE_USER_STATE',
+        };
+      return {
+        message: 'SUCCESS',
+        data: null,
+        code: 200,
+        type: 'RES_UPDATE_USER_STATE',
+      };
     },
-    REMOVE_USER: async (data, sc, io) => {},
+    REMOVE_USER: async (data, sc, io) => {
+      const { room_id, token, muid } = data;
+
+      const { success, err } = await wsBaseHandler(
+        token,
+        room_id,
+        'RES_UPDATE_USER_STATE',
+        [],
+        [muid],
+        true,
+      );
+
+      if (err) return err;
+      const { uuid, meetInfo } = success!;
+
+      const requestUser = meetInfo.participants.find((d) => d.uuid === uuid)!;
+      const isHostRequest = requestUser?.role === 'HOST';
+
+      if (!isHostRequest) {
+        return {
+          message: 'NO_PERMISSION',
+          data: null,
+          code: 403,
+          type: 'RES_REMOVE_USER',
+        };
+      }
+
+      meetInfo.participants = meetInfo.participants.filter(
+        (d) => d.muid !== muid,
+      );
+
+      checkNoneHost(meetInfo);
+
+      await meetInfo.save();
+      io.sockets.in(room_id).emit('USER_UPDATE', {
+        type: 'USER_UPDATE',
+        data: meetInfo,
+      });
+
+      return {
+        message: 'SUCCESS',
+        data: null,
+        code: 200,
+        type: 'RES_REMOVE_USER',
+      };
+    },
   };
 
 export default meetControllers;
