@@ -59,7 +59,7 @@ export const appPeer = express();
 const portPeer = normalizePort(process.env.PEERJS_PORT || '9877');
 const httpServerPeer = createServer(appPeer);
 httpServerPeer.listen(portPeer);
-export const serverPeer = ExpressPeerServer(httpServerPeer, { path: '/' });
+export const serverPeer = ExpressPeerServer(httpServerPeer, { path: '' });
 
 // db
 mongoose.connect(process.env.MONGO_URI!, {
@@ -70,4 +70,3 @@ mongoose.connect(process.env.MONGO_URI!, {
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', console.log.bind(console, 'Connected successfully to MongoDB'));
-

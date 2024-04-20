@@ -12,4 +12,6 @@ declare interface Participant {
   role: 'HOST' | 'PARTICIPANT';
   state: ParticipantState;
   avatar?: string;
+  expandCamera: boolean;
+  mirrorCamera: boolean;
 }

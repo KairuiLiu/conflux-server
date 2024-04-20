@@ -10,7 +10,7 @@ import wsController from './routes/ws';
 const dev = process.env.MODE === 'DEV';
 
 // PeerJS server
-appPeer.use('/peer_signal', serverPeer);
+appPeer.use(process.env.PEER_SERVER_PATH || '/peer_signal', serverPeer);
 
 // WS Server
 io.on('connection', (socket) => {

@@ -18,7 +18,7 @@ router.get('/', (req, res) => {
   res.json(
     genSuccessResponse({
       token: token,
-      COTURN_PATH: process.env.COTURN_PATH,
+      COTURN_PREFIX: process.env.COTURN_PREFIX,
       PEER_SERVER_PATH: process.env.PEER_SERVER_PATH,
       COTURN_USERNAME: process.env.COTURN_USERNAME,
       COTURN_PASSWORD: process.env.COTURN_PASSWORD,

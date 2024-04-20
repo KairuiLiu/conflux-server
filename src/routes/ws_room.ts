@@ -6,7 +6,16 @@ import emitRoom from '@/utils/emit_room';
 
 const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
   JOIN_MEETING: async (data, sc, io) => {
-    const { room_id, user_name, muid, token, state, avatar } = data;
+    const {
+      room_id,
+      user_name,
+      muid,
+      token,
+      state,
+      avatar,
+      expandCamera,
+      mirrorCamera,
+    } = data;
 
     const { success, err } = await wsBaseHandler(
       token,
@@ -40,6 +49,8 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
       role: isOrganizer ? 'HOST' : 'PARTICIPANT',
       state,
       avatar,
+      expandCamera,
+      mirrorCamera,
     });
 
     await meetInfo.save();

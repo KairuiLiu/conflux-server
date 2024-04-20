@@ -38,6 +38,12 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
           dulplicatName = true;
         else targetUser.name = participant_diff.name;
       }
+      if (participant_diff.expandCamera !== undefined) {
+        targetUser.expandCamera = participant_diff.expandCamera;
+      }
+      if (participant_diff.mirrorCamera !== undefined) {
+        targetUser.mirrorCamera = participant_diff.mirrorCamera;
+      }
       if (participant_diff.role !== undefined && isHostRequest)
         targetUser.role = participant_diff.role;
       if (participant_diff.state !== undefined) {
@@ -62,13 +68,18 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
         participant_diff.role !== undefined
       )
         emitRoom(room_id, io, {
-          type: 'USER_UPDATE',
+          type: 'USER_UPDATE', // change multiple user state
           data: meetInfo,
         });
       else
         emitRoom(room_id, io, {
           type: 'USER_STATE_UPDATE',
-          data: { muid, state: participant_diff.state },
+          data: {
+            muid,
+            state: participant_diff.state,
+            expandCamera: participant_diff.expandCamera,
+            mirrorCamera: participant_diff.mirrorCamera,
+          },
         });
 
       if (dulplicatName)
