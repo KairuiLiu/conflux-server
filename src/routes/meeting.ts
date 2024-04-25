@@ -12,7 +12,7 @@ router.post(
   authenticate,
   async (req: MeetingCreateRequest, res: Response) => {
     const uuid = req.auth!.uuid;
-    const { title, organizer_name } = req.body;
+    const { title, organizer_name, start_time } = req.body;
 
     if (!title)
       return res
@@ -33,7 +33,7 @@ router.post(
         name: organizer_name,
       },
       participants: [],
-      start_time: Date.now(),
+      start_time: start_time,
     });
     meetingInfo.save();
 

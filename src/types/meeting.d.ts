@@ -12,6 +12,7 @@ declare interface MeetingCreateRequest extends ExpComRequest, AuthRequest {
   body: {
     title: string;
     organizer_name: string;
+    start_time: number;
   };
 }
 
