@@ -15,6 +15,7 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
       avatar,
       expandCamera,
       mirrorCamera,
+      passcode,
     } = data;
 
     const { success, err } = await wsBaseHandler(
@@ -25,6 +26,14 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
 
     if (err) return err;
     const { uuid, meetInfo } = success!;
+
+    if (passcode !== meetInfo.passcode)
+      return {
+        message: 'Invalid passcode.',
+        data: null,
+        code: 401,
+        type: 'RES_JOIN_MEETING',
+      };
 
     if (~meetInfo.participants.findIndex((d) => d.name === user_name)) {
       return {

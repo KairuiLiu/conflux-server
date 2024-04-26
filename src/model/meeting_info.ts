@@ -14,6 +14,7 @@ const MeetingInfoSchema = new Schema({
     required: true,
   },
   start_time: { type: Number, required: true },
+  passcode: String,
   participants: {
     type: [
       {
@@ -36,7 +37,7 @@ const MeetingInfoSchema = new Schema({
         },
         expandCamera: { type: Boolean, required: true },
         mirrorCamera: { type: Boolean, required: true },
-        avatar: String
+        avatar: String,
       },
     ],
     required: true,
