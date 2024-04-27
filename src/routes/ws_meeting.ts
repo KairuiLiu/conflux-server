@@ -149,6 +149,25 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
         type: 'RES_REMOVE_USER',
       };
     },
+    BOARDCAST_CHAT: async (data, sc, io) => {
+      const { room_id, token, muid, message, time } = data;
+
+      const { success, err } = await wsBaseHandler(
+        token,
+        room_id,
+        'RES_UPDATE_USER_STATE',
+        [],
+        [muid],
+        true,
+      );
+      if (err) return err;
+      const { uuid, meetInfo } = success!;
+
+      emitRoom(room_id, io, {
+        type: 'CHAT',
+        data: { muid, message, time },
+      });
+    },
   };
 
 export default meetControllers;

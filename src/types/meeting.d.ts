@@ -34,4 +34,10 @@ declare interface MeetingInfo {
   passcode: string;
 }
 
+declare interface Chat {
+  muid: string;
+  message: string;
+  time: number;
+}
+
 declare type MeetingInfoMongo = Document & MeetingInfo;
