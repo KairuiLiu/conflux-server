@@ -48,10 +48,10 @@ const MeetingInfoSchema = new Schema({
 export const MeetingInfo = mongoose.model('Meeting', MeetingInfoSchema);
 
 export function meetingInfoFilter(data: MeetingInfoMongo) {
-  const res = {...data};
-  res.organizer.uuid = '';
-  res.participants.forEach((p) => {
-    p.uuid = '';
+  const res = JSON.parse(JSON.stringify(data)) as MeetingInfoMongo;
+  if (res?.organizer?.uuid) res.organizer.uuid = '';
+  res?.participants?.forEach((p) => {
+    if (p.uuid) p.uuid = '';
   });
   return res;
 }
