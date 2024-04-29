@@ -27,14 +27,12 @@ export default {
     !dev && del({ targets: 'dist' }),
     // directly replace the string in the code to avoid the pm2 only refreash .env
     replace({
-      ROLLUP_REPLACE_BUILD_TIME: JSON.stringify(
-        new Date()
-          .toISOString()
-          .replace(
-            /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\.\d*Z/,
-            '$1$2$3$4$5',
-          ),
-      ),
+      ROLLUP_REPLACE_BUILD_TIME: new Date()
+        .toISOString()
+        .replace(
+          /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\.\d*Z/,
+          '$1$2$3$4$5',
+        ),
       ROLLUP_REPLACE_BUILD_VERSION: packageInfo.version,
       preventAssignment: true,
     }),
