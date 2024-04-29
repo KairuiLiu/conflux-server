@@ -2,8 +2,12 @@ import { Router, Response } from 'express';
 import { generateMeetingId } from '@/utils/gen_meeting_id';
 import { authenticate } from '@/utils/token';
 import { genErrorResponse, genSuccessResponse } from '@/utils/gen_response';
-import { MeetingInfo } from '@/model/meeting_info';
-import { MeetingCreateRequest, MeetingGetRequest } from '@/types/meeting';
+import { MeetingInfo, meetingInfoFilter } from '@/model/meeting_info';
+import {
+  MeetingCreateRequest,
+  MeetingGetRequest,
+  MeetingInfoMongo,
+} from '@/types/meeting';
 
 const router = Router();
 
@@ -56,11 +60,15 @@ router.get('/', authenticate, async (req: MeetingGetRequest, res: Response) => {
       genErrorResponse('Name already in use. Please choose another.'),
     );
 
-  if (meetInfo && meetInfo?.passcode !== passcode){
-    if(passcode === '')return res.status(401).json(genErrorResponse('Passcode needed', 401));
+  if (meetInfo && meetInfo?.passcode !== passcode) {
+    if (passcode === '')
+      return res.status(401).json(genErrorResponse('Passcode needed', 401));
     return res.status(401).json(genErrorResponse('Invalid passcode.', 401));
   }
-  if (meetInfo) res.json(genSuccessResponse(meetInfo));
+  if (meetInfo)
+    res.json(
+      genSuccessResponse(meetingInfoFilter(meetInfo as MeetingInfoMongo)),
+    );
   else res.status(404).json(genErrorResponse('Meeting not found.', 404));
 });
 

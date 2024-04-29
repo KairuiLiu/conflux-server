@@ -1,6 +1,7 @@
 import checkNoneHost from '@/utils/check_none_host';
 import wsBaseHandler from '@/utils/ws_base_handler';
 import emitRoom from '@/utils/emit_room';
+import { meetingInfoFilter } from '@/model/meeting_info';
 
 const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
   {
@@ -63,13 +64,15 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
       checkNoneHost(meetInfo);
       await meetInfo.save();
 
+      const meetingInfoOut = meetingInfoFilter(meetInfo);
+
       if (
         participant_diff.name !== undefined ||
         participant_diff.role !== undefined
       )
         emitRoom(room_id, io, {
           type: 'USER_UPDATE', // change multiple user state
-          data: meetInfo,
+          data: meetingInfoOut,
         });
       else
         emitRoom(room_id, io, {
@@ -137,9 +140,12 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
       checkNoneHost(meetInfo);
 
       await meetInfo.save();
-      io.sockets.in(room_id).emit('USER_UPDATE', {
+
+      const meetingInfoOut = meetingInfoFilter(meetInfo);
+
+      emitRoom(room_id, io, {
         type: 'USER_UPDATE',
-        data: meetInfo,
+        data: meetingInfoOut,
       });
 
       return {
@@ -152,7 +158,7 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
     BOARDCAST_CHAT: async (data, sc, io) => {
       const { room_id, token, muid, message, time } = data;
 
-      const { success, err } = await wsBaseHandler(
+      const { err } = await wsBaseHandler(
         token,
         room_id,
         'RES_UPDATE_USER_STATE',
@@ -161,7 +167,6 @@ const meetControllers: Controllers<ClientMeetingKeys, SocketType, ServerType> =
         true,
       );
       if (err) return err;
-      const { uuid, meetInfo } = success!;
 
       emitRoom(room_id, io, {
         type: 'CHAT',

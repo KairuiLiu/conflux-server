@@ -1,4 +1,4 @@
-import { MeetingInfo } from '@/model/meeting_info';
+import { MeetingInfo, meetingInfoFilter } from '@/model/meeting_info';
 import { MeetingInfoMongo } from '@/types/meeting';
 import checkNoneHost from '@/utils/check_none_host';
 import wsBaseHandler from '@/utils/ws_base_handler';
@@ -65,14 +65,16 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
     await meetInfo.save();
     sc.join(room_id);
 
+    const meetingInfoOut = meetingInfoFilter(meetInfo);
+
     emitRoom(meetInfo.id, io, {
       type: 'USER_UPDATE',
-      data: meetInfo,
+      data: meetingInfoOut,
     });
 
     return {
       message: 'SUCCESS',
-      data: meetInfo,
+      data: meetingInfoOut,
       type: 'RES_JOIN_MEETING',
     };
   },
@@ -99,9 +101,11 @@ const roomControllers: Controllers<ClientRoomKeys, SocketType, ServerType> = {
 
     checkNoneHost(meetInfo);
 
+    const meetingInfoOut = meetingInfoFilter(meetInfo);
+
     emitRoom(meetInfo.id, io, {
       type: 'USER_UPDATE',
-      data: meetInfo,
+      data: meetingInfoOut,
     });
 
     meetInfo.save();
