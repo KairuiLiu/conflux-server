@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
+import mime from 'mime-types';
 
 const router = Router();
 
@@ -51,8 +52,9 @@ router.get('/', (req, res) => {
       console.error(err);
       return res.status(404).json(genErrorResponse('Image not found'));
     }
+
     const fileExtension = path.extname(filePath).slice(1);
-    const contentType = `image/${fileExtension}`;
+    const contentType = mime.lookup(fileExtension) || `image/${fileExtension}`;
     res.setHeader('Content-Type', contentType);
     res.send(data);
   });

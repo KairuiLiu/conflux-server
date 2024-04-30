@@ -60,8 +60,19 @@ export default {
       hook: 'writeBundle',
     }),
     !dev && generatePackageJson(),
+    createUploadsFolder(),
   ],
 };
+
+function createUploadsFolder() {
+  return {
+    name: 'create-uploads-folder',
+    generateBundle() {
+      if (!fs.existsSync('dist')) fs.mkdirSync('dist');
+      if (!fs.existsSync('dist/uploads')) fs.mkdirSync('dist/uploads');
+    },
+  };
+}
 
 function generatePackageJson(options = {}) {
   return {
