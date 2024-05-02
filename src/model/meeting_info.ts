@@ -1,3 +1,4 @@
+import { MeetingInfoMongo } from '@/types/meeting';
 import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
@@ -14,6 +15,7 @@ const MeetingInfoSchema = new Schema({
     required: true,
   },
   start_time: { type: Number, required: true },
+  passcode: String,
   participants: {
     type: [
       {
@@ -36,7 +38,7 @@ const MeetingInfoSchema = new Schema({
         },
         expandCamera: { type: Boolean, required: true },
         mirrorCamera: { type: Boolean, required: true },
-        avatar: String
+        avatar: String,
       },
     ],
     required: true,
@@ -44,3 +46,12 @@ const MeetingInfoSchema = new Schema({
 });
 
 export const MeetingInfo = mongoose.model('Meeting', MeetingInfoSchema);
+
+export function meetingInfoFilter(data: MeetingInfoMongo) {
+  const res = JSON.parse(JSON.stringify(data)) as MeetingInfoMongo;
+  if (res?.organizer?.uuid) res.organizer.uuid = '';
+  res?.participants?.forEach((p) => {
+    if (p.uuid) p.uuid = '';
+  });
+  return res;
+}

@@ -9,7 +9,7 @@
     <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=TypeScript&logoColor=white"/>
   </p>
   <h4>
-    <a href="https://conflux.liukairui.me/">Live Demo</a>
+    <a href="https://conflux.liukairui.me/">在线演示</a>
     <span> | </span>
     <a href="./README.md">English</a>
     <span> | </span>
@@ -23,9 +23,11 @@
 
 - 基于 WebRTC 的多人 P2P 视频会议
 - 本地用户, 无需注册, 无需登录
+- 支持会议预约与邀请码入会
+- 支持视频背景替换
 - 支持屏幕共享
+- 支持会议聊天室
 - 支持音视频设备测试与切换
-- 支持会议邀请
 - 支持会议成员权限管理 (设置联席主持人, 禁言, 踢出)
 - 实时流量监控
 

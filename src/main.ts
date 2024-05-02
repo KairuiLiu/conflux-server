@@ -5,6 +5,7 @@ import logger from 'morgan';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import meetingRouter from './routes/meeting';
+import avatarRouter from './routes/avatar';
 import wsController from './routes/ws';
 
 const dev = process.env.MODE === 'DEV';
@@ -53,3 +54,4 @@ app.use(cookieParser());
 
 app.use('/config', configRouter);
 app.use('/meeting', meetingRouter);
+app.use('/avatar', avatarRouter);

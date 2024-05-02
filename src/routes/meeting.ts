@@ -2,8 +2,12 @@ import { Router, Response } from 'express';
 import { generateMeetingId } from '@/utils/gen_meeting_id';
 import { authenticate } from '@/utils/token';
 import { genErrorResponse, genSuccessResponse } from '@/utils/gen_response';
-import { MeetingInfo } from '@/model/meeting_info';
-import { MeetingCreateRequest, MeetingGetRequest } from '@/types/meeting';
+import { MeetingInfo, meetingInfoFilter } from '@/model/meeting_info';
+import {
+  MeetingCreateRequest,
+  MeetingGetRequest,
+  MeetingInfoMongo,
+} from '@/types/meeting';
 
 const router = Router();
 
@@ -12,12 +16,12 @@ router.post(
   authenticate,
   async (req: MeetingCreateRequest, res: Response) => {
     const uuid = req.auth!.uuid;
-    const { title, organizer_name } = req.body;
+    const { title, organizer_name, start_time, passcode } = req.body;
 
     if (!title)
       return res
         .status(400)
-        .json(genErrorResponse('Meeting title is required.'));
+        .json(genErrorResponse('Meeting title is required.', 400));
 
     let meeting_id;
     do {
@@ -33,7 +37,8 @@ router.post(
         name: organizer_name,
       },
       participants: [],
-      start_time: Date.now(),
+      start_time: start_time,
+      passcode,
     });
     meetingInfo.save();
 
@@ -42,7 +47,7 @@ router.post(
 );
 
 router.get('/', authenticate, async (req: MeetingGetRequest, res: Response) => {
-  const { id, name } = req.query;
+  const { id, name, passcode } = req.query;
 
   if (typeof id !== 'string')
     return res
@@ -51,10 +56,20 @@ router.get('/', authenticate, async (req: MeetingGetRequest, res: Response) => {
 
   const meetInfo = await MeetingInfo.findOne({ id: id }).exec();
   if (meetInfo?.participants.find((d) => d.name === name))
-    return res.json(genErrorResponse('Name already in use. Please choose another.'));
+    return res.json(
+      genErrorResponse('Name already in use. Please choose another.'),
+    );
 
-  if (meetInfo) res.json(genSuccessResponse(meetInfo));
-  else res.status(404).json(genErrorResponse('Meeting not found.'));
+  if (meetInfo && meetInfo?.passcode !== passcode) {
+    if (passcode === '')
+      return res.status(401).json(genErrorResponse('Passcode needed', 401));
+    return res.status(401).json(genErrorResponse('Invalid passcode.', 401));
+  }
+  if (meetInfo)
+    res.json(
+      genSuccessResponse(meetingInfoFilter(meetInfo as MeetingInfoMongo)),
+    );
+  else res.status(404).json(genErrorResponse('Meeting not found.', 404));
 });
 
 export default router;
