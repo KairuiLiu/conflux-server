@@ -55,6 +55,7 @@ router.get('/', (req, res) => {
 
     const fileExtension = path.extname(filePath).slice(1);
     const contentType = mime.lookup(fileExtension) || `image/${fileExtension}`;
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
     res.setHeader('Content-Type', contentType);
     res.send(data);
   });
