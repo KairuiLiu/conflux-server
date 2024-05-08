@@ -1,5 +1,5 @@
-import meetControllers from './ws_meeting.js';
-import roomControllers from './ws_room.js';
+import meetControllers from './ws_meeting';
+import roomControllers from './ws_room';
 
 const wsControllers: Controllers<ControllerKeys, SocketType, ServerType> = {
   ...roomControllers,

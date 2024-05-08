@@ -55,3 +55,5 @@ app.use(cookieParser());
 app.use('/config', configRouter);
 app.use('/meeting', meetingRouter);
 app.use('/avatar', avatarRouter);
+
+export {app}

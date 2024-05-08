@@ -129,3 +129,4 @@ dist
 .pnp.*
 ConFlux
 .rollup.cache
+uploads
